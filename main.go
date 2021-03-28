@@ -15,5 +15,5 @@ func main() {
 	r.PUT(notes.PutNotesURL, notes.PutNotesHandler)
 	r.DELETE(notes.DeleteNoteURL, notes.DeleteNoteHandler)
 
-	r.Run(":3000") // listen and serve on 0.0.0.0:3000 (for windows "localhost:3000")
+	r.Run(":3000")
 }

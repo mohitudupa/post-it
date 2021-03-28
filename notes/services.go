@@ -14,8 +14,27 @@ const (
 	defaultLimit  = 100
 )
 
-// GetNoteListHandler : GET method for notes API
+// GetNoteListHandler Gin HTTP handler for getting a list of notes
 func GetNoteListHandler(c *gin.Context) {
+	// swagger:route GET /notes notes listNotes
+	//
+	//
+	// This will return notes based on the offset and limit values
+	// Limit ranges from 1 - 500
+	//
+	//     Consumes:
+	//     - application/json
+	//
+	//     Produces:
+	//     - application/json
+	//
+	//     Schemes: http, https
+	//
+	//     Responses:
+	//       200: GetNoteListResponse
+	//       400: ErrorResponse
+	//       500: ErrorResponse
+
 	// Extract query parameters
 	qry := GetNotesListRequest{defaultOffset, defaultLimit}
 	if err := c.ShouldBindQuery(&qry); err != nil {
@@ -62,8 +81,27 @@ func GetNoteListHandler(c *gin.Context) {
 	c.JSON(200, resp)
 }
 
-// PostNotesHandler : POST method for notes API
+// PostNotesHandler Gin HTTP handler for creating notes
 func PostNotesHandler(c *gin.Context) {
+	// swagger:route POST /notes notes createNotes
+	//
+	//
+	// This will create a note with a title, body and a list of tags
+	//
+	//     Consumes:
+	//     - application/json
+	//
+	//     Produces:
+	//     - application/json
+	//
+	//     Schemes: http, https
+	//
+	//     Responses:
+	//       201: PostNotesResponse
+	//       400: ErrorResponse
+	//       500: ErrorResponse
+
+	// Read POST request body
 	req := PostNotesRequest{}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		// Return a 400 bad request
@@ -72,12 +110,12 @@ func PostNotesHandler(c *gin.Context) {
 		return
 	}
 
+	// Add note to DB
 	n := Note{
 		Title: req.Title,
 		Body:  req.Body,
 		Tags:  req.Tags,
 	}
-
 	id, err := DB.Add(n)
 	if err != nil {
 		// Return a 500 internal server error
@@ -85,12 +123,34 @@ func PostNotesHandler(c *gin.Context) {
 		c.JSON(500, e)
 		return
 	}
+
+	// Return new note ID
 	resp := PostNotesResponse{ID: id}
 	c.JSON(201, resp)
 }
 
-// GetNotesHandler : Get method for notes API
+// GetNotesHandler Gin HTTP handler for getting a note by it's ID
 func GetNotesHandler(c *gin.Context) {
+	// swagger:route GET /notes/{noteId}/ notes getNote
+	//
+	//
+	// This will return a note given it's note ID
+	//
+	//     Consumes:
+	//     - application/json
+	//
+	//     Produces:
+	//     - application/json
+	//
+	//     Schemes: http, https
+	//
+	//     Responses:
+	//       200: GetNotesResponse
+	//       400: ErrorResponse
+	//       404: ErrorResponse
+	//       500: ErrorResponse
+
+	// Get Note ID from URL
 	ids := c.Param("id")
 	id, err := strconv.Atoi(ids)
 	if err != nil {
@@ -100,6 +160,7 @@ func GetNotesHandler(c *gin.Context) {
 		return
 	}
 
+	// Look for note in the DB
 	n, err := DB.Get(id)
 	if err != nil && err.Error() == "404 Not Found" {
 		// Return a 404 not found
@@ -112,12 +173,34 @@ func GetNotesHandler(c *gin.Context) {
 		c.JSON(500, e)
 		return
 	}
+
+	// Return Note
 	resp := GetNotesResponse{Note: n}
 	c.JSON(200, resp)
 }
 
-// PutNotesHandler : PUT method for notes API
+// PutNotesHandler Gin HTTP handler for updating notes
 func PutNotesHandler(c *gin.Context) {
+	// swagger:route PUT /notes/{noteId}/ notes updateNote
+	//
+	//
+	// This will update(replace) a note given it's note ID
+	//
+	//     Consumes:
+	//     - application/json
+	//
+	//     Produces:
+	//     - application/json
+	//
+	//     Schemes: http, https
+	//
+	//     Responses:
+	//       201: PutNotesResponse
+	//       400: ErrorResponse
+	//       404: ErrorResponse
+	//       500: ErrorResponse
+
+	// Get Note ID from URL
 	ids := c.Param("id")
 	id, err := strconv.Atoi(ids)
 	if err != nil {
@@ -127,6 +210,7 @@ func PutNotesHandler(c *gin.Context) {
 		return
 	}
 
+	// Read PUT request body
 	req := PutNotesRequest{}
 	if err = c.ShouldBindJSON(&req); err != nil {
 		// Return a 400 bad request
@@ -141,6 +225,7 @@ func PutNotesHandler(c *gin.Context) {
 		Tags:  req.Tags,
 	}
 
+	// Update note on DB
 	err = DB.Update(id, n)
 	if err != nil && err.Error() == "404 Not Found" {
 		// Return a 404 not found
@@ -154,12 +239,32 @@ func PutNotesHandler(c *gin.Context) {
 		return
 	}
 
+	// Return ID of updated note
 	resp := PutNotesResponse{ID: id}
 	c.JSON(201, resp)
 }
 
-// DeleteNoteHandler : DELETE method for notes API
+// DeleteNoteHandler Gin HTTP handler for deleting notes
 func DeleteNoteHandler(c *gin.Context) {
+	// swagger:route DELETE /notes/{noteId}/ notes deleteNote
+	//
+	//
+	// This will delete a note given it's note ID
+	//
+	//     Consumes:
+	//     - application/json
+	//
+	//     Produces:
+	//     - application/json
+	//
+	//     Schemes: http, https
+	//
+	//     Responses:
+	//       200: DeleteNotesResponse
+	//       400: ErrorResponse
+	//       404: ErrorResponse
+	//       500: ErrorResponse
+
 	ids := c.Param("id")
 	id, err := strconv.Atoi(ids)
 	if err != nil {
